@@ -1,7 +1,7 @@
 import { React, useState } from "react";
 import { ApiKeyManager } from "@esri/arcgis-rest-request";
 import Downshift from "downshift";
-import { geocode } from "@esri/arcgis-rest-geocoding";
+import { geocode, reverseGeocode } from "@esri/arcgis-rest-geocoding";
 import { matchSorter } from "match-sorter";
 
 import {
@@ -24,23 +24,49 @@ export default function Search() {
   const [theAddress, setTheAddress] = useState("");
   const [thePostal, setThePostal] = useState("");
   const [theCity, setTheCity] = useState("");
+  const [theState, setTheState] = useState("");
+  const [theCountry, setTheCountry] = useState("");
   const geocodeResult = ({ selectedItem }) => {
     if (selectedItem) {
       const { magicKey } = selectedItem;
       geocode({ magicKey, maxLocations: 1, authentication }).then((res) => {
-        console.log(res.candidates[0].address);
+        console.log(res.candidates[0]);
         //alert(res.candidates[0].address);
-        const theResult = res.candidates[0].address;
-        handleTheResult(theResult);
+        const theResult = res.candidates[0];
+        handleTheResult(theResult.address);
+        //reverseGeo(theResult);
       });
     }
   };
 
+  /*function reverseGeo(theResult) {
+    reverseGeocode(
+      [theResult.location.y, theResult.location.x],
+      authentication
+    ).then((res) => {
+      console.log(res.address);
+    });
+  }*/
+
+  const commas = [];
+  function findCharacter(word, char) {
+    for (let i = 0; i < word.length; i++) {
+      if (word[i] === char) {
+        commas.push(i);
+      }
+    }
+  }
+
   function handleTheResult(theResult) {
-    setTheAddress(theResult.substring(0, theResult.indexOf(",")));
-    setThePostal(theResult.substring(theResult.length - 5, theResult.length));
-    setTheCity(theResult.substring(theResult.indexOf(",", theResult.indexOf(","))+2, theResult.indexOf(",", theResult.indexOf(","))+11));
-    console.log(theResult);
+    findCharacter(theResult, ",");
+    console.log(commas);
+    setTheAddress(theResult.substring(0, commas[0]));
+    if (commas[2]) {
+      setThePostal(theResult.substring(commas[2] + 2));
+    }
+    setTheCity(theResult.substring(commas[0] + 2, commas[1]));
+    setTheState(theResult.substring(commas[1] + 2, commas[2]));
+    setTheCountry("USA");
   }
 
   const getItems = (allItems, filter) => {
@@ -51,15 +77,17 @@ export default function Search() {
       : allItems;
   };
 
-  function handleChange(event) {
+  function handleAddChange(event) {
     setTheAddress(event.target.value);
-    console.log(theAddress);
   }
+
+  function handleCityChange(event) {}
 
   function handleSubmit(event) {
     event.preventDefault();
     const add = JSON.stringify(theAddress);
-    const post = JSON.stringify(thePostal)
+    const post = JSON.stringify(thePostal);
+    console.log(post);
     geocode({
       address: add,
       postal: post,
@@ -158,13 +186,18 @@ export default function Search() {
               <Input
                 placeholder="ADDRESS"
                 defaultValue={theAddress}
-                onChange={handleChange}
+                onChange={handleAddChange}
               />
-              <Input placeholder="City" defaultValue={theCity}/>
-              <Input placeholder="State" />
+              <Input placeholder="Apartment, unit, suite, or floor #"/>
+              <Input
+                placeholder="City"
+                defaultValue={theCity}
+                onChange={handleCityChange}
+              />
+              <Input placeholder="State" defaultValue={theState} />
               <Input placeholder="Postal/Zip Code" defaultValue={thePostal} />
-              <Input placeholder="Country/Region" />
-              <input type="submit" value="Submit" />
+              <Input placeholder="Country/Region" defaultValue={theCountry} />
+              <Input type="submit" value="Submit" />
             </form>
           </div>
         </div>
