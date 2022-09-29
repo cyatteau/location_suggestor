@@ -1,5 +1,5 @@
 import { ApiKeyManager } from "@esri/arcgis-rest-request";
-import { geocode, suggest } from '@esri/arcgis-rest-geocoding';
+import { suggest } from '@esri/arcgis-rest-geocoding';
 import debounce from 'lodash.debounce';
 import { useEffect, useReducer } from 'react';
 
