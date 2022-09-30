@@ -169,9 +169,27 @@ export default function Search() {
                   setTheCity(event.target.value);
                 }}
               />
-              <Input placeholder="State" defaultValue={theState} />
-              <Input placeholder="Postal/Zip Code" defaultValue={thePostal} />
-              <Input placeholder="Country/Region" defaultValue={theCountry} />
+              <Input
+                placeholder="State"
+                defaultValue={theState}
+                onChange={(event) => {
+                  setTheState(event.target.value);
+                }}
+              />
+              <Input
+                placeholder="Postal/Zip Code"
+                defaultValue={thePostal}
+                onChange={(event) => {
+                  setThePostal(event.target.value);
+                }}
+              />
+              <Input
+                placeholder="Country/Region"
+                defaultValue={theCountry}
+                onChange={(event) => {
+                  setTheCountry(event.target.value);
+                }}
+              />
               <Input type="submit" value="Submit" />
             </form>
           </div>
